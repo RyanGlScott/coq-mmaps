@@ -18,6 +18,7 @@
 
 Require Import Bool PeanoNat BinInt Int MMapInterface MMapList.
 Require Import Orders OrdersFacts OrdersLists.
+Require Import Coq.funind.FunInd.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -1745,6 +1746,7 @@ Proof. now destruct o. Qed.
 
 Ltac nonify e :=
  let E := fresh "E" in
+ let U := fresh "U" in
  assert (E : e = None);
    [ rewrite not_find_iff; auto; intro U;
      try apply gmerge_in in U; intuition_in; order

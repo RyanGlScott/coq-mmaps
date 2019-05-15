@@ -50,9 +50,58 @@ Module PositiveMap <: S with Module E:=PositiveOrderedTypeBits.
 
   Definition lt_key {A} (p p':key*A) := E.lt (fst p) (fst p').
 
+  Instance eqk_refl {A} : Reflexive (@eq_key A) := _.
+  Proof. unfold Reflexive. reflexivity. Qed.
+  Instance eqk_symm {A} : Symmetric (@eq_key A) := _.
+  Proof. unfold Symmetric. symmetry. auto. Qed.
+  Instance eqk_trans {A} : Transitive (@eq_key A) := _.
+  Proof.
+    unfold Transitive, eq_key. intros x y z H1 H2.
+    rewrite H1. auto.
+  Qed.
   Instance eqk_equiv {A} : Equivalence (@eq_key A) := _.
+  Proof. split.
+  - apply eqk_refl.
+  - apply eqk_symm.
+  - apply eqk_trans.
+  Qed.
+
+  Instance eqke_refl {A} : Reflexive (@eq_key_elt A) := _.
+  Proof. split; reflexivity. Qed.
+  Instance eqke_symm {A} : Symmetric (@eq_key_elt A) := _.
+  Proof.
+    unfold Symmetric, eq_key_elt. intros x y H. destruct H.
+    split; symmetry; auto.
+  Qed.
+  Instance eqke_trans {A} : Transitive (@eq_key_elt A) := _.
+  Proof.
+    unfold Transitive, eq_key_elt. intros x y z H1 H2. destruct H1, H2. split.
+    - rewrite H. auto.
+    - rewrite H0. auto.
+  Qed.
   Instance eqke_equiv {A} : Equivalence (@eq_key_elt A) := _.
+  Proof. split.
+  - apply eqke_refl.
+  - apply eqke_symm.
+  - apply eqke_trans.
+  Qed.
+
+  Instance ltk_irrefl {A} : Irreflexive (@lt_key A) := _.
+  Proof.
+    unfold Irreflexive, Reflexive, complement, lt_key. intros x H.
+    destruct E.lt_strorder. destruct StrictOrder_Irreflexive with (x := fst x). auto.
+  Qed.
+  Instance ltk_trans {A} : Transitive (@lt_key A) := _.
+  Proof.
+    unfold Transitive, lt_key. intros x y z H1 H2.
+    destruct E.lt_strorder.
+    apply StrictOrder_Transitive with (x := fst x) (y := fst y) (z := fst z); auto.
+  Qed.
   Instance ltk_strorder {A} : StrictOrder (@lt_key A) := _.
+  Proof. split.
+  - apply ltk_irrefl.
+  - apply ltk_trans.
+  Qed.
 
   Inductive tree (A : Type) :=
     | Leaf : tree A
@@ -306,6 +355,7 @@ Module PositiveMap <: S with Module E:=PositiveOrderedTypeBits.
         * destruct H' as (x,(->,H)).
           red. simpl. now apply lt_rev_append.
       + intros x (y,e') Hx Hy. inversion_clear Hy.
+        unfold eq_key_elt in H. destruct H.
         rewrite H. simpl. now apply lt_rev_append.
         rewrite xbindings_spec in H.
         destruct H as [H|H].
